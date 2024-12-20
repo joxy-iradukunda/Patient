@@ -12,9 +12,6 @@ public interface AppointmentRepo extends JpaRepository<Appointment, Long> {
     @Query("SELECT a FROM Appointment a WHERE a.email = :email ORDER BY a.date DESC, a.time DESC")
     List<Appointment> findAllByEmailOrderByDateTimeDesc(@Param("email") String email);
     
-    @Query("SELECT a FROM Appointment a WHERE a.email = :email")
-    List<Appointment> findByEmail(@Param("email") String email);
-    
-    @Query("SELECT a FROM Appointment a WHERE a.docId = :docId")
-    List<Appointment> findByDocId(@Param("docId") String docId);
+    List<Appointment> findByEmail(String email);
+    List<Appointment> findByDocId(String docId);
 }

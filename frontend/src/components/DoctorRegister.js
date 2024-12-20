@@ -9,7 +9,9 @@ function DoctorRegister() {
     name: '',
     specialization: '',
     experience: '',
-    qualification: ''
+    qualification: '',
+    age: '',
+    gender: ''
   });
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -25,12 +27,49 @@ function DoctorRegister() {
     e.preventDefault();
     setError('');
     try {
-      const response = await axios.post('http://localhost:8080/registereddoc', formData);
+      // Validate required fields
+      if (!formData.email || !formData.email.includes('@')) {
+        setError('Please enter a valid email address');
+        return;
+      }
+      if (!formData.password || formData.password.length < 6) {
+        setError('Password must be at least 6 characters long');
+        return;
+      }
+      if (!formData.name.trim()) {
+        setError('Name is required');
+        return;
+      }
+      if (!formData.specialization) {
+        setError('Please select a specialization');
+        return;
+      }
+      if (!formData.qualification.trim()) {
+        setError('Qualification is required');
+        return;
+      }
+      if (!formData.age || parseInt(formData.age) < 1 || parseInt(formData.age) > 120) {
+        setError('Please enter a valid age between 1 and 120');
+        return;
+      }
+      if (!formData.gender) {
+        setError('Please select your gender');
+        return;
+      }
+
+      const response = await axios.post('http://localhost:8080/registereddoc', {
+        ...formData,
+        email: formData.email.toLowerCase().trim(),
+        name: formData.name.trim(),
+        qualification: formData.qualification.trim(),
+        gender: formData.gender.toLowerCase()
+      });
+      
       console.log('Registration response:', response);
-      if (response.data === 'Registration successful') {
+      if (response.data && response.data.email) {
         navigate('/doctor-login');
       } else {
-        setError(typeof response.data === 'string' ? response.data : 'Registration failed. Please try again.');
+        setError('Registration failed. Please try again.');
       }
     } catch (err) {
       console.error('Registration error:', err);
@@ -52,9 +91,7 @@ function DoctorRegister() {
               {error && <div className="alert alert-danger">{error}</div>}
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
-                  <label htmlFor="email" className="form-label">
-                    Email
-                  </label>
+                  <label htmlFor="email" className="form-label">Email</label>
                   <input
                     type="email"
                     className="form-control"
@@ -66,9 +103,7 @@ function DoctorRegister() {
                   />
                 </div>
                 <div className="mb-3">
-                  <label htmlFor="password" className="form-label">
-                    Password
-                  </label>
+                  <label htmlFor="password" className="form-label">Password</label>
                   <input
                     type="password"
                     className="form-control"
@@ -76,13 +111,12 @@ function DoctorRegister() {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
+                    minLength="6"
                     required
                   />
                 </div>
                 <div className="mb-3">
-                  <label htmlFor="name" className="form-label">
-                    Full Name
-                  </label>
+                  <label htmlFor="name" className="form-label">Full Name</label>
                   <input
                     type="text"
                     className="form-control"
@@ -94,9 +128,37 @@ function DoctorRegister() {
                   />
                 </div>
                 <div className="mb-3">
-                  <label htmlFor="specialization" className="form-label">
-                    Specialization
-                  </label>
+                  <label htmlFor="age" className="form-label">Age</label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    id="age"
+                    name="age"
+                    value={formData.age}
+                    onChange={handleChange}
+                    min="1"
+                    max="120"
+                    required
+                  />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="gender" className="form-label">Gender</label>
+                  <select
+                    className="form-control"
+                    id="gender"
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="specialization" className="form-label">Specialization</label>
                   <select
                     className="form-control"
                     id="specialization"
@@ -118,9 +180,19 @@ function DoctorRegister() {
                   </select>
                 </div>
                 <div className="mb-3">
-                  <label htmlFor="experience" className="form-label">
-                    Years of Experience
-                  </label>
+                  <label htmlFor="qualification" className="form-label">Qualification</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="qualification"
+                    name="qualification"
+                    value={formData.qualification}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="experience" className="form-label">Years of Experience</label>
                   <input
                     type="number"
                     className="form-control"
@@ -132,29 +204,7 @@ function DoctorRegister() {
                     required
                   />
                 </div>
-                <div className="mb-3">
-                  <label htmlFor="qualification" className="form-label">
-                    Qualification
-                  </label>
-                  <select
-                    className="form-control"
-                    id="qualification"
-                    name="qualification"
-                    value={formData.qualification}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="">Select Qualification</option>
-                    <option value="MBBS">MBBS</option>
-                    <option value="MD">MD</option>
-                    <option value="MS">MS</option>
-                    <option value="DM">DM</option>
-                    <option value="DNB">DNB</option>
-                  </select>
-                </div>
-                <button type="submit" className="btn btn-primary w-100">
-                  Register as Doctor
-                </button>
+                <button type="submit" className="btn btn-primary w-100">Register</button>
               </form>
             </div>
           </div>

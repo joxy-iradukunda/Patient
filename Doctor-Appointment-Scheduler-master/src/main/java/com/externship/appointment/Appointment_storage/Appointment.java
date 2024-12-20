@@ -1,38 +1,76 @@
 package com.externship.appointment.Appointment_storage;
 
-import javax.persistence.*;
+import java.sql.Date;
+import java.sql.Time;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "appointments")
 public class Appointment {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "app_id")
     private Long appId;
 
-    @Column(nullable = false)
+    @NotBlank(message = "Patient email is required")
+    @Column(name = "email")
     private String email;
 
-    @Column(name = "doc_id", nullable = false)
+    @NotBlank(message = "Doctor ID is required")
+    @Column(name = "doc_id")
     private String docId;
 
-    @Column(name = "doc_name", nullable = false)
+    @NotBlank(message = "Doctor name is required")
+    @Column(name = "doc_name")
     private String docName;
 
-    @Column(name = "doc_special", nullable = false)
+    @NotBlank(message = "Doctor specialization is required")
+    @Column(name = "doc_special")
     private String docSpecial;
 
-    @Column(nullable = false)
+    @Column(name = "status")
     private String status = "Active";
 
-    @Column(nullable = false)
-    private String date;
+    @NotNull(message = "Appointment date is required")
+    @Column(name = "date")
+    private Date date;
 
-    @Column
+    @Column(name = "symptoms")
     private String symptoms;
+    
+    @Column(name = "time")
+    private Time time;
 
-    @Column
-    private String time;
+    public Appointment() {
+    }
+
+    public Appointment(String email, String docId, String docName, String docSpecial, Date date, Time time,
+            String symptoms) {
+        this.email = email;
+        this.docId = docId;
+        this.docName = docName;
+        this.docSpecial = docSpecial;
+        this.date = date;
+        this.time = time;
+        this.symptoms = symptoms;
+    }
+
+    public Long getAppId() {
+        return appId;
+    }
+
+    public void setAppId(Long appId) {
+        this.appId = appId;
+    }
 
     public String getEmail() {
         return email;
@@ -48,22 +86,6 @@ public class Appointment {
 
     public void setDocId(String docId) {
         this.docId = docId;
-    }
-
-    public String getDate() {
-        return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
-    }
-
-    public Long getAppId() {
-        return appId;
-    }
-
-    public void setAppId(Long appId) {
-        this.appId = appId;
     }
 
     public String getDocName() {
@@ -90,6 +112,14 @@ public class Appointment {
         this.status = status;
     }
 
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
     public String getSymptoms() {
         return symptoms;
     }
@@ -98,11 +128,11 @@ public class Appointment {
         this.symptoms = symptoms;
     }
 
-    public String getTime() {
+    public Time getTime() {
         return time;
     }
 
-    public void setTime(String time) {
+    public void setTime(Time time) {
         this.time = time;
     }
 
@@ -115,9 +145,9 @@ public class Appointment {
                 ", docName='" + docName + '\'' +
                 ", docSpecial='" + docSpecial + '\'' +
                 ", status='" + status + '\'' +
-                ", date='" + date + '\'' +
+                ", date=" + date +
                 ", symptoms='" + symptoms + '\'' +
-                ", time='" + time + '\'' +
+                ", time=" + time +
                 '}';
     }
 }

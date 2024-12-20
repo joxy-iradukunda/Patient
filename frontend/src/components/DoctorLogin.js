@@ -19,15 +19,28 @@ function DoctorLogin() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     try {
-      const response = await axios.post('http://localhost:8080/authenticatedoc', formData);
-      if (response.data) {
-        localStorage.setItem('doctorToken', response.data);
-        localStorage.setItem('doctorEmail', formData.email);
+      const response = await axios.post('http://localhost:8080/authenticatedoc', 
+        {
+          email: formData.email.trim().toLowerCase(),
+          password: formData.password
+        },
+        { withCredentials: true }
+      );
+      
+      console.log('Login response:', response.data);
+      
+      if (response.data && response.data.email) {
+        localStorage.setItem('doctorToken', 'true');
+        localStorage.setItem('doctorEmail', response.data.email);
         navigate('/doctor-dashboard');
+      } else {
+        setError('Invalid credentials. Please try again.');
       }
     } catch (err) {
-      setError('Invalid credentials. Please try again.');
+      console.error('Login error:', err.response?.data || err.message);
+      setError(err.response?.data || 'Invalid credentials. Please try again.');
     }
   };
 

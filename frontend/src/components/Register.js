@@ -69,14 +69,14 @@ function Register() {
       
       console.log('Registration response:', response.data);
       
-      if (response.data === 'Registration successful') {
+      if (response.data && response.data.email) {
         navigate('/login');
       } else {
         setError('Registration failed. Please try again.');
       }
     } catch (err) {
       console.error('Registration error:', err.response?.data || err.message);
-      setError(err.response?.data || 'Registration failed. Please try again.');
+      setError(err.response?.data?.message || err.response?.data || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }

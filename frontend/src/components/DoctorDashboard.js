@@ -9,38 +9,89 @@ function DoctorDashboard() {
   const doctorEmail = localStorage.getItem('doctorEmail');
 
   useEffect(() => {
-    if (!localStorage.getItem('doctorToken')) {
-      navigate('/doctor-login');
-      return;
-    }
-    fetchAppointments();
+    const checkAuth = async () => {
+      const token = localStorage.getItem('doctorToken');
+      const email = localStorage.getItem('doctorEmail');
+      
+      if (!token || !email) {
+        navigate('/doctor-login');
+        return;
+      }
+
+      try {
+        // Verify the session is still valid
+        const response = await axios.get('http://localhost:8080/doctor-details', {
+          withCredentials: true
+        });
+        
+        if (!response.data || !response.data.email) {
+          throw new Error('Session expired');
+        }
+        
+        fetchAppointments();
+      } catch (err) {
+        console.error('Auth check failed:', err);
+        localStorage.removeItem('doctorToken');
+        localStorage.removeItem('doctorEmail');
+        navigate('/doctor-login');
+      }
+    };
+
+    checkAuth();
   }, [navigate]);
 
   const fetchAppointments = async () => {
     try {
-      const response = await axios.get('http://localhost:8080/patientlist');
-      setAppointments(response.data.appointments || []);
+      const response = await axios.get('http://localhost:8080/patientlist', {
+        withCredentials: true,
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      });
+      
+      console.log('Appointments response:', response.data);
+      
+      if (!response.data) {
+        setAppointments([]);
+        return;
+      }
+
+      setAppointments(Array.isArray(response.data) ? response.data : []);
     } catch (err) {
-      setError('Failed to fetch appointments');
+      console.error('Error fetching appointments:', err.response?.data || err.message);
+      if (err.response?.status === 401 || err.response?.data === 'Doctor not logged in') {
+        navigate('/doctor-login');
+      } else {
+        setError(err.response?.data || 'Failed to fetch appointments');
+      }
     }
   };
 
   const handleStatusUpdate = async (appointmentId, newStatus) => {
     try {
-      await axios.post(`http://localhost:8080/updateAppointment`, {
+      await axios.post(`http://localhost:8080/update-appointment`, {
         appId: appointmentId,
         status: newStatus
+      }, {
+        withCredentials: true
       });
       fetchAppointments();
     } catch (err) {
-      setError('Failed to update appointment status');
+      console.error('Error updating status:', err.response?.data || err.message);
+      setError(err.response?.data || 'Failed to update appointment status');
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('doctorToken');
-    localStorage.removeItem('doctorEmail');
-    navigate('/doctor-login');
+  const handleLogout = async () => {
+    try {
+      await axios.post('http://localhost:8080/logout', {}, { withCredentials: true });
+    } catch (err) {
+      console.error('Error during logout:', err);
+    } finally {
+      localStorage.removeItem('doctorToken');
+      localStorage.removeItem('doctorEmail');
+      navigate('/doctor-login');
+    }
   };
 
   return (

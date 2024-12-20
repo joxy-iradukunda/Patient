@@ -1,0 +1,40 @@
+services:
+  # Backend API service
+  - type: web
+    name: patient-system-api
+    env: java
+    plan: free
+    buildCommand: cd Doctor-Appointment-Scheduler-master && ./mvnw clean install -DskipTests
+    startCommand: cd Doctor-Appointment-Scheduler-master && java -jar target/*.jar
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: MYSQL_DATABASE
+        value: patient_system
+      - key: MYSQL_USER
+        value: ${MYSQL_USER}
+      - key: MYSQL_PASSWORD
+        value: ${MYSQL_PASSWORD}
+      - key: MYSQL_HOST
+        value: ${MYSQL_HOST}
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:mysql://${MYSQL_HOST}:3306/${MYSQL_DATABASE}
+      - key: SPRING_DATASOURCE_USERNAME
+        value: ${MYSQL_USER}
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: ${MYSQL_PASSWORD}
+
+  # Frontend static site
+  - type: web
+    name: patient-system-frontend
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/build
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://patient-system-api.onrender.com
+
+databases:
+  - name: patient-system-db
+    plan: free
+    type: mysql

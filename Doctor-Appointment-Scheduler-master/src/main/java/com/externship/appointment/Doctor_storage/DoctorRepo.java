@@ -5,4 +5,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DoctorRepo extends JpaRepository<Doctor, String> {
+    Doctor findByEmail(String email);
 }

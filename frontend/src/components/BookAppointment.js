@@ -52,13 +52,25 @@ function BookAppointment() {
         return;
       }
 
-      console.log('Sending appointment data:', formData);
-      const response = await axios.post('http://localhost:8080/assignment', formData);
+      // Format the date and time for the backend
+      const appointmentData = {
+        ...formData,
+        date: formData.date, // Already in YYYY-MM-DD format
+        time: formData.time + ':00', // Add seconds to match SQL time format
+      };
+
+      console.log('Sending appointment data:', appointmentData);
+      const response = await axios.post('http://localhost:8080/book-appointment', appointmentData, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       console.log('Appointment response:', response.data);
       navigate('/appointments');
     } catch (err) {
       console.error('Appointment error:', err.response?.data || err.message);
-      setError(err.response?.data || 'Failed to book appointment. Please try again.');
+      setError(typeof err.response?.data === 'string' ? err.response.data : 'Failed to book appointment. Please try again.');
     }
   };
 
